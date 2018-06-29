@@ -5,7 +5,7 @@ title: Async module initialization
 
 I want to create a wrapper around AWS-SDK - let's take dynamoDB for example.
 My wrapper will have bunch of functions that uses aws-sdk to talk to dynamo. 
-All the functions within that wrapper will modify a single table. The tricky part is: That table name is not static and can be different based on the execution. As a matter of fact we use AWS Parameter Store for it which means those config will be available asynchronously.
+All the functions within that wrapper will modify a single table. The tricky part is: That table name is not static and can be different based on the execution. As a matter of fact we use AWS Parameter Store for it which means those config will be available asynchronously, at runtime. Problem is, how do you write the code in a smart way and keep it DRY.
 
 Ideally if the config we're static I would just do womething like:
 
@@ -32,7 +32,7 @@ module.exports = function (callback) {
 };
 {% endhighlight %}
 
-that's ok, but now whoever needs that will have to do:
+that's ok and now whoever needs that will have to do:
 
 {% highlight js %}
 require('dynamoWrapper')(doSomething)
@@ -51,7 +51,7 @@ const a = () => {require('dynamoWrapper')(doA)};
 const b = () => {require('dynamoWrapper')(doB)};
 {% endhighlight %}
 
-
+This is basically removing the problem from one place to another.
 ok, so another option is to have a class and init() that class, and have every function in that class access "this":
 
 {% highlight js %}
@@ -71,4 +71,4 @@ class Wrapper {
 }
 {% endhighlight %}
 
-Problem with that approach, is that you have to remember to init, and you have to create a new instance every time (maybe singelton will work here).
+Problem with that approach, is 1 - that you have to remember to init, 2 - you have to create a new instance every time (maybe singelton will work here), 3 - you can only init within a function, cause otherwise you wouldn't be able to mock the getConfig.
