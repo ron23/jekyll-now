@@ -1,10 +1,24 @@
 ---
 layout: post
-title: You're up and running!
+title: Async module initialization
 ---
 
-Next you can update your site name, avatar and other options using the _config.yml file in the root of your repository (shown below).
+I want to create a wrapper around AWS-SDK - let's take dynamoDB for example.
+My wrapper will have bunch of functions that uses aws-sdk to talk to dynamo. 
+All the functions within that wrapper will modify a single table. The tricky part is: That table name is not static and can be different based on the execution. As a matter of fact we use AWS Parameter Store for it which means those config will be available asynchronously.
 
-![_config.yml]({{ site.baseurl }}/images/config.png)
+Ideally if the config we're static I would just do womething like:
+```
+const putValue = value => dynamo.put({value, table:config.table}));
+```
 
-The easiest way to make your first post is to edit this one. Go into /_posts/ and update the Hello World markdown file. For more instructions head over to the [Jekyll Now repository](https://github.com/barryclark/jekyll-now) on GitHub.
+However, config are not available, so I can wrap it with a configGetter:
+```
+const putValue = value => getConfig().then(config => dynamo.put({value, table:config.table})));
+```
+
+That's nice, but I don't want to do it in 20 different functions.
+
+So, I thought of a few solutions:
+
+1. 
