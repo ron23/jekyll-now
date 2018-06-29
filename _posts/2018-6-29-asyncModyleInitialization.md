@@ -10,23 +10,31 @@ All the functions within that wrapper will modify a single table. The tricky par
 Ideally if the config we're static I would just do womething like:
 
 {% highlight js %}
-const a = [1,2,3];
 const putValue = value => dynamo.put({value, table:config.table}));
-
 {% endhighlight %}
 
-```js
-const putValue = value => dynamo.put({value, table:config.table}));
-```
-
-However, config are not available, so I can wrap it with a configGetter:
-```
-const putValue = value => 
-getConfig().then(config => dynamo.put({value, table:config.table})));
-```
+However, config are not available, so I can call my configGetter function:
+{% highlight js %}
+const putValue = value => getConfig()
+.then(config => dynamo.put({value, table:config.table})));
+{% endhighlight %}
 
 That's nice, but I don't want to do it in 20 different functions.
 
-So, I thought of a few solutions:
+I also don't want to call my configGetter many times (ideally that function will be responsible for cacheing, but who knows).
 
-1. 
+So, I thought I can do something like an asyncRequire - I got the idea [here](https://stackoverflow.com/questions/20315434/node-js-asynchronous-module-loading):
+
+{% highlight js %}
+const configGetter  = require('configGetter');
+module.exports = function (callback) {
+  configGetter.get('/etc/passwd').then(callback(config))
+};
+{% endhighlight %}
+
+that's ok, but now whoever needs that will have to do:
+{% highlight js %}
+require('dynamoWrapper')(doSomething)
+{% endhighlight %}
+
+problem is, that doSomething is actually in the same place as the wrapper, so it's gonna be something like:
