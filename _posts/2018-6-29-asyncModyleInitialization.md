@@ -33,8 +33,42 @@ module.exports = function (callback) {
 {% endhighlight %}
 
 that's ok, but now whoever needs that will have to do:
+
 {% highlight js %}
 require('dynamoWrapper')(doSomething)
 {% endhighlight %}
 
-problem is, that doSomething is actually in the same place as the wrapper, so it's gonna be something like:
+couple of problems with this approach, mostly that the functions like `doSomething` will have to be written like:
+
+{% highlight js %}
+const doSomething = config => (a,b) => doSomethingWithConfig
+{% endhighlight %}
+
+another problem is that If I need to access my wrapper from different functions, and those functions pass different callback, I will have to require the same file in multiple places - I don't even think it's going to work in modules mocking for testing. Example:
+
+{% highlight js %}
+const a = () => {require('dynamoWrapper')(doA)};
+const b = () => {require('dynamoWrapper')(doB)};
+{% endhighlight %}
+
+
+ok, so another option is to have a class and init() that class, and have every function in that class access "this":
+
+{% highlight js %}
+class Wrapper {
+  constructor() {
+    this.config = null;
+  }
+
+
+  init() {
+    this.config = config;
+  }
+
+  doSomething() {
+  // can access this.config here
+   }
+}
+{% endhighlight %}
+
+Problem with that approach, is that you have to remember to init, and you have to create a new instance every time (maybe singelton will work here).
