@@ -4,10 +4,14 @@ title: Async module initialization
 ---
 
 I want to create a wrapper around AWS-SDK - let's take dynamoDB for example.
-My wrapper will have bunch of functions that uses aws-sdk to talk to dynamo. 
-All the functions within that wrapper will modify a single table. The tricky part is: That table name is not static and can be different based on the execution. As a matter of fact we use AWS Parameter Store for it which means those config will be available asynchronously, at runtime. Problem is, how do you write the code in a smart way and keep it DRY.
 
-Ideally if the config we're static I would just do womething like:
+My wrapper will have bunch of functions that uses aws-sdk to talk to dynamo.
+
+All the functions within that wrapper will modify a single table but that table name is known only a runtime - it's basically a config that is stored somewhere and we need to make async call to fetch that value. 
+
+Problem is, how do you write the code in a smart way and keep it DRY.
+
+Ideally if the config were static I would just do womething like:
 
 {% highlight js %}
 const putValue = value => dynamo.put({value, table:config.table}));
@@ -15,11 +19,10 @@ const putValue = value => dynamo.put({value, table:config.table}));
 
 However, config are not available, so I can call my configGetter function:
 {% highlight js %}
-const putValue = value => getConfig()
-.then(config => dynamo.put({value, table:config.table})));
+const putValue = value => getConfig().then(config => dynamo.put({value, table:config.table})));
 {% endhighlight %}
 
-That's nice, but I don't want to do it in 20 different functions.
+That's nice, but I don't want to do it in 20 different functions that needs those config.
 
 I also don't want to call my configGetter many times (ideally that function will be responsible for cacheing, but who knows).
 
@@ -28,7 +31,7 @@ So, I thought I can do something like an asyncRequire - I got the idea [here](ht
 {% highlight js %}
 const configGetter  = require('configGetter');
 module.exports = function (callback) {
-  configGetter.get('/etc/passwd').then(callback(config))
+  configGetter.get().then(config => callback(config))
 };
 {% endhighlight %}
 
@@ -71,4 +74,12 @@ class Wrapper {
 }
 {% endhighlight %}
 
-Problem with that approach, is 1 - that you have to remember to init, 2 - you have to create a new instance every time (maybe singelton will work here), 3 - you can only init within a function, cause otherwise you wouldn't be able to mock the getConfig.
+Problem with that approach, is 1 - that you have to remember to init, 2 - you have to create a new instance every time (maybe singelton will work here), 3 - you can only init within a function, cause otherwise you wouldn't be able to mock the getConfig - if you just put something like:
+
+{% highlight js %}
+const DynamoWrapper = require(dynamoWrapper);
+const dynamoWrapper = new DynamoWrapper();
+dynamoWrapper.init();
+{% endhighlight %}
+
+then you wouldn't be able to mock anything that dynamoWrapper is doing in it's `init()` becase the init will be called before the test code.
