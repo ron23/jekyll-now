@@ -1,4 +1,7 @@
-# API Best Practices
+---
+layout: post
+title: API Best Practices
+---
 
 REST represents an entity.
 
