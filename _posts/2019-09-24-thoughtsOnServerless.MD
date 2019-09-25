@@ -3,7 +3,7 @@ layout: post
 title: Thoughts on architecture
 ---
 
-# Microservices / Serverless / Event-driven architecture
+#### Microservices / Serverless / Event-driven architecture
 
 * retries: good & bad. Great to solve network failures etc. Bad in case on non-idempotent actions. 
 In those cases, need to have some request ID to make sure the same request is not done multiple times.
