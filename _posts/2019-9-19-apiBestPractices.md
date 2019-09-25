@@ -57,8 +57,8 @@ Use swagger. No questions asked. Takes minutes to set up. Write the API first.
 - Don't mix queryString and path: `users?id=123` vs `users/123`
 
 ## Authorization & Authentication
-- Authorization - who you are
-- Authentication - what can you do
+- Authorization - what can you do
+- Authentication - who you are
 
 Use JWT. JWT contains the claims: groups/roles etc.
 
