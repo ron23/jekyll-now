@@ -6,7 +6,7 @@
 name: Ron
 
 # Short bio or description (displayed in the header)
-description: JS Developer
+description: Full-Stack Developer (Javascript)
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
 avatar: https://avatars3.githubusercontent.com/u/5150512?s=460&v=4
@@ -22,10 +22,10 @@ footer-links:
   flickr:
   github: ron23
   instagram:
-  linkedin:
+  linkedin: https://www.linkedin.com/in/ronrosenshain/
   pinterest:
   rss: # just type anything here for a working RSS icon
-  twitter: ronos_r
+  twitter: https://twitter.com/ronos_r
   stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
   youtube: # channel/<your_long_string> or user/<user-name>
   googleplus: # anything in your profile username that comes after plus.google.com/
